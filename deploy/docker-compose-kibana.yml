@@ -1,0 +1,9 @@
+services:
+  kibana:
+    ##change your local images
+    image: docker.elastic.co/kibana/kibana:5.3.0
+    environment:
+      ##change your server_name
+      SERVER_NAME: kibana.example.org
+      ##change your URL
+      ELASTICSEARCH_URL: http://elasticsearch.example.org
