@@ -1,0 +1,59 @@
+version: '3'
+services:
+  elasticsearch: 
+    image: 10.172.111.168/elastic/elasticsearch:5.3.0
+    container_name: elasticsearch
+    restart: always
+    environment:  
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 2g
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./data/esdata:/usr/share/elasticsearch/data
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - esnet
+  kibana:
+    image: 10.172.111.168/elastic/kibana:5.3.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: http://10.172.114.201:9200
+    restart: always
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      - esnet
+  logstash:
+    image: 10.172.111.168/elastic/logstash:5.3.0
+    container_name: logstash
+    restart: always
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    networks:
+      - esnet     
+volumes:
+  data/esdata:
+    driver: local
+  config:
+    driver: local
+networks:
+  esnet:
+    driver: bridge
